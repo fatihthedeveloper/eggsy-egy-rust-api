@@ -2,7 +2,7 @@ import type {
     D1DatabaseReadResponse,
     D1DatabaseRequest,
     D1DatabaseWriteResponse
-} from "../../models/d1database/index.js";
+} from "../../models/database/index.js";
 
 export interface D1Database {
     write(request: D1DatabaseRequest): Promise<D1DatabaseWriteResponse>;
@@ -46,6 +46,8 @@ export class D1DatabaseService implements D1Database {
         });
 
         const data: D1DatabaseReadResponse<T> = await response.json();
+
+        console.warn(JSON.stringify(data));
 
         return Promise.resolve(data);
     }

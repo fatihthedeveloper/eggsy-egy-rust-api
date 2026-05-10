@@ -4,6 +4,6 @@ import {buildBadResponse} from "../../utils/http.js";
 
 export class NotFoundEndpoint implements Controller {
     public async handle(): Promise<APIGatewayProxyStructuredResultV2> {
-        return buildBadResponse("Not Found");
+        return buildBadResponse("Invalid Route");
     }
 }

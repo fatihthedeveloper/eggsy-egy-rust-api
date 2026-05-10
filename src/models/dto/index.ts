@@ -1,23 +1,27 @@
 import type {
     CreateAccountRequest,
-    CreateAccountResponse,
-    RotateAccountRequest, RotateAccountResponse
+    CreateAccountResponse
 } from "./account.js";
+import type {CreateTransactionRequest, CreateTransactionResponse} from "./transaction.js";
 
 export interface RequestPayload {
     requestId: string;
     action: string;
-    email?: string;
     authentication?: string;
-    data: RequestPayloadData;
-}
-
-interface RequestPayloadData {
-    createAccountData?: CreateAccountRequest;
-    rotateAccountData?: RotateAccountRequest;
+    claims?: {
+        email: string;
+    };
+    data: {
+        createAccountData?: CreateAccountRequest;
+        createTransactionData?: CreateTransactionRequest;
+    };
 }
 
 export interface ResponsePayload {
-    createAccountData?: CreateAccountResponse;
-    rotateAccountData?: RotateAccountResponse;
+    success?: boolean;
+    errorMessage?: string;
+    data?: {
+        createAccountData?: CreateAccountResponse;
+        createTransactionData?: CreateTransactionResponse;
+    }
 }

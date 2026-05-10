@@ -10,7 +10,7 @@ interface D1DatabaseBaseResponse {
 }
 
 interface D1DatabaseResult<T> {
-    results: T[];
+    results: Array<T>;
     success: boolean;
 }
 
@@ -18,5 +18,5 @@ export interface D1DatabaseWriteResponse extends D1DatabaseBaseResponse {
 }
 
 export interface D1DatabaseReadResponse<T> extends D1DatabaseBaseResponse {
-    result: D1DatabaseResult<T>;
+    result: D1DatabaseResult<T>[];
 }
