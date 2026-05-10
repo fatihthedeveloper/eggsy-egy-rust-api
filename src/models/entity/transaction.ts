@@ -9,4 +9,5 @@ export interface TransactionEntity {
     description: string;
     createdAt: number;
     updatedAt: number;
+    category: string;
 }

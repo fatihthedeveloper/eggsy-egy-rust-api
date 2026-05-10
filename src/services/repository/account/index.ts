@@ -29,8 +29,6 @@ export class D1AccountRepository implements AccountRepository {
             params: [email]
         })
 
-        console.warn(JSON.stringify(response));
-
         if (!response.success) {
             return undefined;
         }

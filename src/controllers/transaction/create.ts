@@ -20,7 +20,7 @@ export class CreateTransactionEndpoint implements Controller{
             return buildBadResponse("email claim is required");
         }
 
-        data.data.createTransactionData.email = data.claims?.email
+        data.data.createTransactionData.email = data.claims?.email;
 
         const transactionId = await this.transactionRepository.create({
             ...data.data.createTransactionData,

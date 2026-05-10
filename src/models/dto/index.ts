@@ -2,7 +2,12 @@ import type {
     CreateAccountRequest,
     CreateAccountResponse
 } from "./account.js";
-import type {CreateTransactionRequest, CreateTransactionResponse} from "./transaction.js";
+import type {
+    CreateTransactionRequest,
+    CreateTransactionResponse,
+    GetTransactionRequest, ListTransactionRequest,
+    UpdateTransactionRequest
+} from "./transaction.js";
 
 export interface RequestPayload {
     requestId: string;
@@ -14,6 +19,9 @@ export interface RequestPayload {
     data: {
         createAccountData?: CreateAccountRequest;
         createTransactionData?: CreateTransactionRequest;
+        updateTransactionData?: UpdateTransactionRequest;
+        getTransactionData?: GetTransactionRequest;
+        listTransactionData?: ListTransactionRequest;
     };
 }
 
@@ -23,5 +31,8 @@ export interface ResponsePayload {
     data?: {
         createAccountData?: CreateAccountResponse;
         createTransactionData?: CreateTransactionResponse;
+        updateTransactionData?: CreateTransactionResponse;
+        getTransactionData?: CreateTransactionResponse;
+        listTransactionData?: CreateTransactionResponse[];
     }
 }

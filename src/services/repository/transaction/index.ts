@@ -3,7 +3,9 @@ import type {D1Database} from "../../database/index.js";
 
 export interface TransactionRepository {
     create(transaction: TransactionEntity): Promise<string>;
+    update(transaction: TransactionEntity): Promise<void>;
     get(transaction: string): Promise<TransactionEntity | undefined>;
+    list(email: string, page: number, pageSize: number, startDate?: string, endDate?: string, category?: string): Promise<TransactionEntity[]>;
 }
 
 export class D1TransactionRepository implements TransactionRepository {
@@ -14,15 +16,91 @@ export class D1TransactionRepository implements TransactionRepository {
     }
 
     private readonly INSERT_TRANSACTION_SQL: string = `
-        INSERT INTO transactions (id, email, transactionDate, amount, currency, transactionType, merchantName, description, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO transactions (id, email, transactionDate, amount, currency, transactionType, merchantName, description, createdAt, updatedAt, category)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    private readonly SELECT_TRANSACTIONS_SQL: string = `
-        SELECT * FROM transactions
-            WHERE transactionDate BETWEEN ? AND ?
-        LIMIT ? OFFSET ?
+    private readonly UPDATE_TRANSACTION_SQL: string = `
+        UPDATE transactions 
+        SET 
+            transactionDate = ?,
+            amount = ?,
+            currency = ?,
+            transactionType = ?,
+            merchantName = ?,
+            description = ?,
+            updatedAt = ?,
+            category = ?
+        WHERE id = ? AND email = ?
     `;
+
+    public async list(email: string, page: number, pageSize: number, startDate?: string, endDate?: string, category?: string): Promise<TransactionEntity[]> {
+        const offset = (page - 1) * pageSize;
+
+        const sql = `
+            SELECT * FROM transactions WHERE email = ? 
+                ${startDate ? `AND transactionDate >= ?` : ""} 
+                ${endDate ? `AND transactionDate <= ?` : ""} 
+                ${category ? `AND category = ?` : ""} 
+           ORDER BY transactionDate DESC LIMIT ${pageSize} OFFSET ${offset}
+        `;
+
+        const params: string[] = [email];
+        if (startDate) {
+            params.push(startDate);
+        }
+        if (endDate) {
+            params.push(endDate);
+        }
+        if (category) {
+            params.push(category);
+        }
+
+        const response = await this.d1Database.read<TransactionEntity>({
+            sql, params,
+        });
+
+        if (!response.success) {
+            return Promise.reject(new Error("Failed to list transactions"));
+        }
+
+        if (!response.result.at(0)) {
+            return Promise.reject(new Error("No transactions found"));
+        }
+
+        const transactions = response.result.at(0)?.results;
+
+        if (!transactions) {
+            return Promise.reject(new Error("No transactions found"));
+        }
+
+        return transactions;
+
+    }
+
+    public async update(transaction: TransactionEntity): Promise<void> {
+        const response = await this.d1Database.write({
+            sql: this.UPDATE_TRANSACTION_SQL,
+            params: [
+                transaction.transactionDate,
+                transaction.amount.toString(),
+                transaction.currency,
+                transaction.transactionType,
+                transaction.merchantName,
+                transaction.description,
+                transaction.updatedAt.toString(),
+                transaction.category,
+                transaction.id,
+                transaction.email,
+            ]
+        });
+
+        if (!response.success) {
+            return Promise.reject(new Error("Failed to update transaction"));
+        }
+
+        return Promise.resolve();
+    }
 
     public async get(transaction: string): Promise<TransactionEntity | undefined> {
         const response = await this.d1Database.read<TransactionEntity>({
@@ -47,10 +125,9 @@ export class D1TransactionRepository implements TransactionRepository {
                 transaction.description,
                 transaction.createdAt.toString(),
                 transaction.updatedAt.toString(),
+                transaction.category,
             ]
         });
-
-        console.log(response);
 
         if (!response.success) {
             return Promise.reject(new Error("Failed to create transaction"));
