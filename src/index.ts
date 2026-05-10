@@ -3,11 +3,17 @@ import type {Handler, LambdaFunctionURLEvent, LambdaFunctionURLResult
 import type {RequestPayload} from "./models/dto/index.js";
 import {buildBadResponse} from "./utils/http.js";
 import type {Controller} from "./controllers/index.js";
-import {CreateAccountEndpoint} from "./controllers/account/createAccountEndpoint.js";
-import {NotFoundEndpoint} from "./controllers/generic/notFoundEndpoint.js";
-import {type AccountRepository, D1AccountRepository} from "./services/accountRepository/accountRepository.js";
-import {D1DatabaseService} from "./services/d1database/index.js";
+import {CreateAccountEndpoint} from "./controllers/account/create.js";
+import {NotFoundEndpoint} from "./controllers/generic/notFound.js";
+import {type AccountRepository, D1AccountRepository} from "./services/repository/account/index.js";
+import {D1DatabaseService} from "./services/database/index.js";
 import * as process from "node:process";
+import {CreateTransactionEndpoint} from "./controllers/transaction/create.js";
+import {
+    D1TransactionRepository,
+    type TransactionRepository
+} from "./services/repository/transaction/index.js";
+import {AuthenticatedEndpoint} from "./controllers/generic/authenticated.js";
 
 export const handler: Handler<LambdaFunctionURLEvent, LambdaFunctionURLResult> = async (event) => {
     if (!event.body) {
@@ -24,10 +30,17 @@ export const handler: Handler<LambdaFunctionURLEvent, LambdaFunctionURLResult> =
         process.env.D1_ACCOUNT_TOKEN!
     );
     const accountRepository: AccountRepository = new D1AccountRepository(d1DatabaseService);
+    const transactionRepository: TransactionRepository = new D1TransactionRepository(d1DatabaseService);
 
     switch (data.action) {
         case "createAccount":
-            endpoint = new CreateAccountEndpoint(accountRepository);
+            endpoint = new CreateAccountEndpoint(
+                accountRepository);
+            break;
+        case "createTransaction":
+            endpoint = new AuthenticatedEndpoint(
+                new CreateTransactionEndpoint(transactionRepository),
+                accountRepository);
             break;
         default:
             endpoint = new NotFoundEndpoint();

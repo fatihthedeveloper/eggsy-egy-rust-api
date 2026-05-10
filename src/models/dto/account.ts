@@ -8,14 +8,3 @@ export interface CreateAccountResponse {
     message?: string;
     secret?: string;
 }
-
-export interface RotateAccountRequest {
-    email: string;
-    password: string;
-}
-
-export interface RotateAccountResponse {
-    success: boolean;
-    error?: string;
-    message?: string;
-}
