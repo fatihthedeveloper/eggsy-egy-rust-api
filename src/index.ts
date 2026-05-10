@@ -14,6 +14,9 @@ import {
     type TransactionRepository
 } from "./services/repository/transaction/index.js";
 import {AuthenticatedEndpoint} from "./controllers/generic/authenticated.js";
+import {UpdateTransactionEndpoint} from "./controllers/transaction/update.js";
+import {GetTransactionEndpoint} from "./controllers/transaction/get.js";
+import {ListTransactionEndpoint} from "./controllers/transaction/list.js";
 
 export const handler: Handler<LambdaFunctionURLEvent, LambdaFunctionURLResult> = async (event) => {
     if (!event.body) {
@@ -34,12 +37,26 @@ export const handler: Handler<LambdaFunctionURLEvent, LambdaFunctionURLResult> =
 
     switch (data.action) {
         case "createAccount":
-            endpoint = new CreateAccountEndpoint(
-                accountRepository);
+            endpoint = new CreateAccountEndpoint(accountRepository);
             break;
         case "createTransaction":
             endpoint = new AuthenticatedEndpoint(
                 new CreateTransactionEndpoint(transactionRepository),
+                accountRepository);
+            break;
+        case "updateTransaction":
+            endpoint = new AuthenticatedEndpoint(
+                new UpdateTransactionEndpoint(transactionRepository),
+                accountRepository);
+            break;
+        case "getTransaction":
+            endpoint = new AuthenticatedEndpoint(
+                new GetTransactionEndpoint(transactionRepository),
+                accountRepository);
+            break;
+        case "listTransaction":
+            endpoint = new AuthenticatedEndpoint(
+                new ListTransactionEndpoint(transactionRepository),
                 accountRepository);
             break;
         default:

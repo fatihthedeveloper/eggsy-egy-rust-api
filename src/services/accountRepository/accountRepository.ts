@@ -31,8 +31,6 @@ export class D1AccountRepository implements AccountRepository {
             ]
         })
 
-        console.log(response);
-
         if (!response.success) {
             return Promise.reject(new Error("Failed to create account"));
         }
@@ -45,8 +43,6 @@ export class D1AccountRepository implements AccountRepository {
             sql: `SELECT secret FROM Users WHERE email = ?`,
             params: [email]
         })
-
-        console.log(response);
 
         if (response.result.results.length <= 0) {
             return Promise.reject(new Error("Account not found"));

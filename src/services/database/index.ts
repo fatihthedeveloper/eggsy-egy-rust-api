@@ -32,6 +32,8 @@ export class D1DatabaseService implements D1Database {
 
         const data: D1DatabaseWriteResponse = await response.json();
 
+        console.debug(JSON.stringify(data));
+
         return Promise.resolve(data);
     }
 
@@ -47,7 +49,7 @@ export class D1DatabaseService implements D1Database {
 
         const data: D1DatabaseReadResponse<T> = await response.json();
 
-        console.warn(JSON.stringify(data));
+        console.debug(JSON.stringify(data));
 
         return Promise.resolve(data);
     }
