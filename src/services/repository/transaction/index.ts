@@ -5,6 +5,7 @@ export interface TransactionRepository {
     create(transaction: TransactionEntity): Promise<string>;
     update(transaction: TransactionEntity): Promise<void>;
     get(transaction: string): Promise<TransactionEntity | undefined>;
+    delete(transaction: string): Promise<void>;
     list(email: string, page: number, pageSize: number, startDate?: string, endDate?: string, category?: string): Promise<TransactionEntity[]>;
 }
 
@@ -33,6 +34,19 @@ export class D1TransactionRepository implements TransactionRepository {
             category = ?
         WHERE id = ? AND email = ?
     `;
+
+    public async delete(transaction: string): Promise<void> {
+        const response = await this.d1Database.write({
+            sql: "DELETE FROM transactions WHERE id = ?",
+            params: [transaction]
+        });
+
+        if (!response.success) {
+            return Promise.reject(new Error("Failed to delete transaction"));
+        }
+
+        return Promise.resolve();
+    }
 
     public async list(email: string, page: number, pageSize: number, startDate?: string, endDate?: string, category?: string): Promise<TransactionEntity[]> {
         const offset = (page - 1) * pageSize;

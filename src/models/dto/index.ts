@@ -22,6 +22,7 @@ export interface RequestPayload {
         updateTransactionData?: UpdateTransactionRequest;
         getTransactionData?: GetTransactionRequest;
         listTransactionData?: ListTransactionRequest;
+        deleteTransactionData?: GetTransactionRequest;
     };
 }
 
@@ -34,5 +35,6 @@ export interface ResponsePayload {
         updateTransactionData?: CreateTransactionResponse;
         getTransactionData?: CreateTransactionResponse;
         listTransactionData?: CreateTransactionResponse[];
+        deleteTransactionData?: string;
     }
 }
