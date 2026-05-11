@@ -17,6 +17,7 @@ import {AuthenticatedEndpoint} from "./controllers/generic/authenticated.js";
 import {UpdateTransactionEndpoint} from "./controllers/transaction/update.js";
 import {GetTransactionEndpoint} from "./controllers/transaction/get.js";
 import {ListTransactionEndpoint} from "./controllers/transaction/list.js";
+import {DeleteTransactionEndpoint} from "./controllers/transaction/delete.js";
 
 export const handler: Handler<LambdaFunctionURLEvent, LambdaFunctionURLResult> = async (event) => {
     if (!event.body) {
@@ -57,6 +58,11 @@ export const handler: Handler<LambdaFunctionURLEvent, LambdaFunctionURLResult> =
         case "listTransaction":
             endpoint = new AuthenticatedEndpoint(
                 new ListTransactionEndpoint(transactionRepository),
+                accountRepository);
+            break;
+        case "deleteTransaction":
+            endpoint = new AuthenticatedEndpoint(
+                new DeleteTransactionEndpoint(transactionRepository),
                 accountRepository);
             break;
         default:
