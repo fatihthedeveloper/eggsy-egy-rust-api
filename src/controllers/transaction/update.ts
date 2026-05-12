@@ -1,8 +1,8 @@
 import type {Controller} from "../index.js";
 import type {TransactionRepository} from "../../services/repository/transaction/index.js";
 import type {RequestPayload} from "../../models/dto/index.js";
-import {buildBadResponse, buildSuccessResponse} from "../../utils/http.js";
-import type {APIGatewayProxyStructuredResultV2} from "aws-lambda";
+import {badJson, okJson} from "../../utils/http.js";
+import type {LambdaFunctionURLResult} from "aws-lambda";
 
 export class UpdateTransactionEndpoint implements Controller{
     private transactionRepository: TransactionRepository;
@@ -11,13 +11,13 @@ export class UpdateTransactionEndpoint implements Controller{
         this.transactionRepository = transactionRepository;
     }
 
-    public async handle(data: RequestPayload): Promise<APIGatewayProxyStructuredResultV2> {
+    public async handle(data: RequestPayload): Promise<LambdaFunctionURLResult> {
         if (!data.data.updateTransactionData) {
-            return buildBadResponse("`updateTransactionData` is required");
+            return badJson("`updateTransactionData` is required");
         }
 
         if (!data.claims?.email) {
-            return buildBadResponse("email claim is required");
+            return badJson("email claim is required");
         }
 
         data.data.updateTransactionData.email = data.claims?.email;
@@ -25,7 +25,7 @@ export class UpdateTransactionEndpoint implements Controller{
         const oldTransaction = await this.transactionRepository.get(data.data.updateTransactionData.id);
 
         if (!oldTransaction) {
-            return buildBadResponse("old Transaction not found");
+            return badJson("old Transaction not found");
         }
 
         await this.transactionRepository.update({
@@ -38,10 +38,10 @@ export class UpdateTransactionEndpoint implements Controller{
         const newTransaction = await this.transactionRepository.get(data.data.updateTransactionData.id);
 
         if (!newTransaction) {
-            return buildBadResponse("Failed to update transaction");
+            return badJson("Failed to update transaction");
         }
 
-        return buildSuccessResponse({
+        return okJson({
             data: {
                 updateTransactionData: newTransaction
             }

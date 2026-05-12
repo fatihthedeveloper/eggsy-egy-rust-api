@@ -1,7 +1,7 @@
-import type {APIGatewayProxyStructuredResultV2} from "aws-lambda";
+import type {APIGatewayProxyStructuredResultV2, LambdaFunctionURLResult} from "aws-lambda";
 import type {ResponsePayload} from "../models/dto/index.js";
 
-export const buildBadResponse: (message: string) => APIGatewayProxyStructuredResultV2 = (message: string) => {
+export const badJson: (message: string) => LambdaFunctionURLResult = (message: string) => {
     const finalResponsePayload: ResponsePayload = {
         errorMessage: message,
         success: true
@@ -16,7 +16,7 @@ export const buildBadResponse: (message: string) => APIGatewayProxyStructuredRes
     }
 }
 
-export const buildSuccessResponse: (data: ResponsePayload) => APIGatewayProxyStructuredResultV2 = (data: ResponsePayload) => {
+export const okJson: (data: ResponsePayload) => LambdaFunctionURLResult = (data: ResponsePayload) => {
     const finalResponsePayload: ResponsePayload = {
         ...data,
         success: true
@@ -30,3 +30,23 @@ export const buildSuccessResponse: (data: ResponsePayload) => APIGatewayProxyStr
         body: JSON.stringify(finalResponsePayload)
     }
 }
+
+export const badHtml: (data: string) => LambdaFunctionURLResult = (data: string) => (
+    {
+        statusCode: 500,
+        headers: {
+            "Content-Type": "text/html"
+        },
+        body: `<h1>${data}</h1>`
+    }
+);
+
+export const okHtml: (data: string) => LambdaFunctionURLResult = (data: string) => (
+    {
+        statusCode: 200,
+        headers: {
+            "Content-Type": "text/html"
+        },
+        body: data
+    }
+);

@@ -1,8 +1,8 @@
 import type {Controller} from "../index.js";
 import type {TransactionRepository} from "../../services/repository/transaction/index.js";
 import type {RequestPayload} from "../../models/dto/index.js";
-import type {APIGatewayProxyStructuredResultV2} from "aws-lambda";
-import {buildBadResponse, buildSuccessResponse} from "../../utils/http.js";
+import type {LambdaFunctionURLResult} from "aws-lambda";
+import {badJson, okJson} from "../../utils/http.js";
 
 export class CreateTransactionEndpoint implements Controller{
     private transactionRepository: TransactionRepository;
@@ -11,13 +11,13 @@ export class CreateTransactionEndpoint implements Controller{
         this.transactionRepository = transactionRepository;
     }
 
-    public async handle(data: RequestPayload): Promise<APIGatewayProxyStructuredResultV2> {
+    public async handle(data: RequestPayload): Promise<LambdaFunctionURLResult> {
         if (!data.data.createTransactionData) {
-            return buildBadResponse("`createTransactionData` is required");
+            return badJson("`createTransactionData` is required");
         }
 
         if (!data.claims?.email) {
-            return buildBadResponse("email claim is required");
+            return badJson("email claim is required");
         }
 
         data.data.createTransactionData.email = data.claims?.email;
@@ -33,10 +33,10 @@ export class CreateTransactionEndpoint implements Controller{
         const getResponse = await this.transactionRepository.get(transactionId);
 
         if (!getResponse) {
-            return buildBadResponse("Failed to create transaction");
+            return badJson("Failed to create transaction");
         }
 
-        return buildSuccessResponse({
+        return okJson({
             data: {
                 createTransactionData: getResponse
             }

@@ -1,9 +1,9 @@
 import type {Controller} from "../index.js";
-import type {APIGatewayProxyStructuredResultV2} from "aws-lambda";
-import {buildBadResponse} from "../../utils/http.js";
+import type {LambdaFunctionURLResult} from "aws-lambda";
+import {badJson} from "../../utils/http.js";
 
 export class NotFoundEndpoint implements Controller {
-    public async handle(): Promise<APIGatewayProxyStructuredResultV2> {
-        return buildBadResponse("Invalid Route");
+    public async handle(): Promise<LambdaFunctionURLResult> {
+        return badJson("Invalid Route");
     }
 }

@@ -1,6 +1,7 @@
-import type {RequestPayload} from "../models/dto/index.js";
-import type {APIGatewayProxyStructuredResultV2} from "aws-lambda";
+import type {RequestPayload, ViewPayload} from "../models/dto/index.js";
+import type {APIGatewayProxyStructuredResultV2, LambdaFunctionURLResult} from "aws-lambda";
 
 export interface Controller {
-    handle(data: RequestPayload): Promise<APIGatewayProxyStructuredResultV2>
+    handle(data: RequestPayload): Promise<LambdaFunctionURLResult>
 }
+
