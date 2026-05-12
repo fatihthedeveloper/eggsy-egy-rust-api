@@ -1,7 +1,7 @@
 import type {Handler, LambdaFunctionURLEvent, LambdaFunctionURLResult
 } from 'aws-lambda';
-import type {RequestPayload} from "./models/dto/index.js";
-import {buildBadResponse} from "./utils/http.js";
+import type {RequestPayload, ViewPayload} from "./models/dto/index.js";
+import {badJson} from "./utils/http.js";
 import type {Controller} from "./controllers/index.js";
 import {CreateAccountEndpoint} from "./controllers/account/create.js";
 import {NotFoundEndpoint} from "./controllers/generic/notFound.js";
@@ -18,10 +18,50 @@ import {UpdateTransactionEndpoint} from "./controllers/transaction/update.js";
 import {GetTransactionEndpoint} from "./controllers/transaction/get.js";
 import {ListTransactionEndpoint} from "./controllers/transaction/list.js";
 import {DeleteTransactionEndpoint} from "./controllers/transaction/delete.js";
+import type {View} from "./view/index.js";
+import {HomeView} from "./view/home/index.js";
+import {NotFoundView} from "./view/generic/notFound.js";
+import {SignupView} from "./view/account/signup.js";
 
-export const handler: Handler<LambdaFunctionURLEvent, LambdaFunctionURLResult> = async (event) => {
+const viewHandler: Handler<LambdaFunctionURLEvent, LambdaFunctionURLResult> = async (event) => {
+    if (!event.queryStringParameters) {
+        return badJson("No query parameters provided");
+    }
+
+    let {route} = event.queryStringParameters;
+    if (!route) {
+        route = "home"
+    }
+
+    const data = JSON.parse(JSON.stringify(event.queryStringParameters)) as ViewPayload;
+
+    let view: View;
+
+    const d1DatabaseService: D1DatabaseService = new D1DatabaseService(
+        process.env.D1_ACCOUNT_ID!,
+        process.env.D1_DATABASE_ID!,
+        process.env.D1_ACCOUNT_TOKEN!
+    );
+    const accountRepository: AccountRepository = new D1AccountRepository(d1DatabaseService);
+
+    switch (route) {
+        case "home":
+            view = new HomeView();
+            break;
+        case "signup":
+            view = new SignupView(accountRepository);
+            break;
+        default:
+            view = new NotFoundView();
+            break;
+    }
+
+    return (await view.render(data))!;
+}
+
+const postHandler: Handler<LambdaFunctionURLEvent, LambdaFunctionURLResult> = async (event) => {
     if (!event.body) {
-        return buildBadResponse("No body provided");
+        return badJson("No body provided");
     }
 
     const data = JSON.parse(event.body) as RequestPayload;
@@ -70,5 +110,13 @@ export const handler: Handler<LambdaFunctionURLEvent, LambdaFunctionURLResult> =
             break;
     }
 
-    return await endpoint.handle(data);
+    return (await endpoint.handle(data))!;
 };
+
+export const handler: Handler<LambdaFunctionURLEvent, LambdaFunctionURLResult> = (event, context, callback) => {
+    if (event.requestContext.http.method == "POST") {
+        return postHandler(event, context, callback);
+    }
+
+    return viewHandler(event, context, callback);
+}

@@ -1,8 +1,8 @@
 import type {Controller} from "../index.js";
 import type {RequestPayload} from "../../models/dto/index.js";
-import type {APIGatewayProxyStructuredResultV2} from "aws-lambda";
+import type {LambdaFunctionURLResult} from "aws-lambda";
 import type {AccountRepository} from "../../services/repository/account/index.js";
-import {buildBadResponse} from "../../utils/http.js";
+import {badJson} from "../../utils/http.js";
 
 export class AuthenticatedEndpoint implements Controller{
     private readonly internalEndpoint: Controller;
@@ -13,26 +13,26 @@ export class AuthenticatedEndpoint implements Controller{
         this.accountRepository = accountRepository;
     }
 
-    public async handle(data: RequestPayload): Promise<APIGatewayProxyStructuredResultV2> {
+    public async handle(data: RequestPayload): Promise<LambdaFunctionURLResult> {
         const auth = data.authentication;
         if (!auth) {
-            return buildBadResponse("No authentication token provided");
+            return badJson("No authentication token provided");
         }
 
         const [email, token] = auth.split("::");
 
         if (!email || !token) {
-            return buildBadResponse("Invalid authentication token");
+            return badJson("Invalid authentication token");
         }
 
         const account = await this.accountRepository.get(email);
         if (!account) {
-            return buildBadResponse("Account not found");
+            return badJson("Account not found");
         }
 
         const {secret} = account;
         if (secret !== token) {
-            return buildBadResponse("Invalid authentication token");
+            return badJson("Invalid authentication token");
         }
 
         data.claims = {

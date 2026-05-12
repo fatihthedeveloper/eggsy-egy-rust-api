@@ -38,3 +38,8 @@ export interface ResponsePayload {
         deleteTransactionData?: string;
     }
 }
+
+export interface ViewPayload {
+    route: string;
+    email?: string;
+}
